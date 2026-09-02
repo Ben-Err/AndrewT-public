@@ -1,4 +1,8 @@
 <#
+.NOTES 
+Modified by: Ben Ford
+    02/09/26 - Removed some items from bloat list, removed some of the manual dell installs, removed AV removal as I won't be maintaining this, removed intune items, removed blanket uninstall function, moved edge bookmarks unpin after vendor items
+                Aim is to primarily remove the win11 specific packages at this point.
 .SYNOPSIS
 .Removes bloat from a fresh Windows build
 .DESCRIPTION
@@ -930,7 +934,7 @@ Get-AppxPackage Microsoft.549981C3F5F10 -allusers | Remove-AppxPackage
 #                                   Disable unwanted OOBE screens for Device Prep                          #
 #                                                                                                          #
 ############################################################################################################
-
+<#
 $registryPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\OOBE"
 $registryPath2 = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System"
 $Name1 = "DisablePrivacyExperience"
@@ -945,7 +949,7 @@ New-ItemProperty -Path $registryPath -Name $name3 -Value 1 -PropertyType DWord -
 New-ItemProperty -Path $registryPath -Name $name4 -Value 3 -PropertyType DWord -Force
 New-ItemProperty -Path $registryPath -Name $name5 -Value 1 -PropertyType DWord -Force
 New-ItemProperty -Path $registryPath2 -Name $name6 -Value 0 -PropertyType DWord -Force
-
+#>
 
 
 ############################################################################################################
@@ -1801,6 +1805,7 @@ New-ItemProperty -Path $surf -Name 'AllowSurfGame' -Value 0 -PropertyType DWord
 #                                            Misc Shortcut Removal                                         #
 #                                                                                                          #
 ############################################################################################################
+#Benutzerhandbuch is some german dictionary idk -bf
 
 $link1 = "C:\Users\All Users\Microsoft\Windows\Start Menu\Programs\Benutzerhandbuch.lnk"
 
@@ -2471,39 +2476,39 @@ if ($manufacturer -like "*Dell*")
     $UninstallPrograms = @(
         "Dell Power Manager"
         "DellOptimizerUI"
-        "Dell SupportAssist OS Recovery"
+        #"Dell SupportAssist OS Recovery"
         "Dell SupportAssist"
         "DellInc.PartnerPromo"
         "DellInc.DellOptimizer"
-        "DellInc.DellCommandUpdate"
+        #"DellInc.DellCommandUpdate"
         "DellInc.DellPowerManager"
-        "DellInc.DellDigitalDelivery"
+        #"DellInc.DellDigitalDelivery"
         "DellInc.DellSupportAssistforPCs"
         "DellInc.PartnerPromo"
-        "Dell Command | Update"
+        #"Dell Command | Update"
         "Dell Command | Update for Windows Universal"
         "Dell Command | Update for Windows 10"
         "Dell Command | Power Manager"
-        "Dell Digital Delivery Service"
-        "Dell Digital Delivery"
+        #"Dell Digital Delivery Service"
+        #"Dell Digital Delivery"
         "Dell Peripheral Manager"
         "Dell Power Manager Service"
         "Dell SupportAssist Remediation"
-        "SupportAssist Recovery Assistant"
-        "Dell SupportAssist OS Recovery Plugin for Dell Update"
+        #"SupportAssist Recovery Assistant"
+        #"Dell SupportAssist OS Recovery Plugin for Dell Update"
         "Dell SupportAssistAgent"
         ##"Dell Update - SupportAssist Update Plugin"
-        "Dell Core Services"
+        #"Dell Core Services"
         "Dell Pair"
         "Dell Display Manager 2.0"
         "Dell Display Manager 2.1"
         "Dell Display Manager 2.2"
         "DellInc.PartnerPromo"
-        "Dell Trusted Device"
+        #"Dell Trusted Device"
         ##This is handled further down
         ##"Dell Optimizer"
         "Dell AppCore (Optimizer Console)"
-        "Dell AppCore"
+        #"Dell AppCore"
     )
 
     ##Stop Running Processes
@@ -2750,7 +2755,7 @@ if ($manufacturer -like "*Dell*")
         }
     }
 
-
+<#
 
     ##Dell Dell SupportAssist Remediation
     $dellSA = Get-ChildItem -Path HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall, HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall | Get-ItemProperty | Where-Object { $_.DisplayName -match "Dell SupportAssist Remediation" } | Select-Object -Property QuietUninstallString
@@ -2836,7 +2841,7 @@ if ($manufacturer -like "*Dell*")
     }
 
 }
-
+#>
 
 if ($manufacturer -like "Lenovo")
 {
@@ -3695,26 +3700,9 @@ if ($manufacturer -like "*Acer*")
         }
     }
 
-    write-output "Removed Samsung bloat"
+    write-output "Removed Acer bloat"
 }
 
-##Remove bookmarks
-
-##Enumerate all users
-$users = Get-ChildItem -Path "C:\Users" -Directory
-foreach ($user in $users)
-{
-    $userpath = $user.FullName
-    $bookmarks = "C:\Users\$userpath\AppData\Local\Microsoft\Edge\User Data\Default\Bookmarks"
-    ##Remove any files if they exist
-    foreach ($bookmark in $bookmarks)
-    {
-        if (Test-Path -Path $bookmark)
-        {
-            Remove-Item -Path $bookmark -Force
-        }
-    }
-}
 
 if ($manufacturer -like "*Asus*")
 {
@@ -3809,7 +3797,23 @@ if ($manufacturer -like "*Asus*")
 #end ASUS specific
 
 
+##Remove bookmarks
 
+##Enumerate all users
+$users = Get-ChildItem -Path "C:\Users" -Directory
+foreach ($user in $users)
+{
+    $userpath = $user.FullName
+    $bookmarks = "C:\Users\$userpath\AppData\Local\Microsoft\Edge\User Data\Default\Bookmarks"
+    ##Remove any files if they exist
+    foreach ($bookmark in $bookmarks)
+    {
+        if (Test-Path -Path $bookmark)
+        {
+            Remove-Item -Path $bookmark -Force
+        }
+    }
+}
 
 
 ############################################################################################################
@@ -3818,7 +3822,7 @@ if ($manufacturer -like "*Asus*")
 ############################################################################################################
 
 #McAfee
-
+<#
 write-output "Detecting McAfee"
 $mcafeeinstalled = "false"
 $InstalledSoftware = Get-ChildItem "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall"
@@ -3951,8 +3955,8 @@ if ($mcafeeinstalled -eq "true")
     { Remove-Item -Path "${env:ProgramFiles(x86)}\McAfee" -Recurse -Force
     }
 }
-
-
+#>
+<#
 ##Look for anything else
 
 ##Make sure Intune hasn't installed anything so we don't remove installed apps
@@ -4046,7 +4050,7 @@ if ($IsOOBEComplete -eq 0)
 
 
     }
-
+#>
 
 
     ## The XML below will Remove Retail Copies of Office 365 and OneNote, including all languages. Note: Office Apps for Entreprise Editions will remain.
